@@ -52,7 +52,8 @@ class TSocket(TSocketBase):
 
     def __init__(self, host='localhost', port=9090, unix_socket=None,
                  socket_family=socket.AF_UNSPEC,
-                 socket_keepalive=False):
+                 socket_keepalive=False,
+                 bind_intf=None):
         """Initialize a TSocket
 
         @param host(str)  The host to connect to.
@@ -61,6 +62,7 @@ class TSocket(TSocketBase):
                                  (host and port will be ignored.)
         @param socket_family(int)  The socket family to use with this socket.
         @param socket_keepalive(bool) enable TCP keepalive, default off.
+        @param bind_intf(str)  The interface to bind to
         """
         self.host = host
         self.port = port
@@ -69,6 +71,7 @@ class TSocket(TSocketBase):
         self._timeout = None
         self._socket_family = socket_family
         self._socket_keepalive = socket_keepalive
+        self._bind_intf = bind_intf
 
     def setHandle(self, h):
         self.handle = h
@@ -134,6 +137,9 @@ class TSocket(TSocketBase):
             # TCP keep-alive
             if self._socket_keepalive:
                 handle.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+
+            if self._bind_intf:
+               handle.setsockopt(socket.SOL_SOCKET, socket.SO_BINDTODEVICE, self._bind_intf)
 
             handle.settimeout(self._timeout)
             try:
